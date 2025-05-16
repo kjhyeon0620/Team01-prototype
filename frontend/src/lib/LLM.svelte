@@ -94,7 +94,7 @@
 
 	import { ApprovalModalStore, openApprovalModal, DepositWarningModalStore, openDepositWarningModal } from './store'
 	import ApprovalModal from './ApprovalModal.svelte'
-	import DepositWarningModal from './DepositWarningModal.svelte'
+	import DepositWarningModal from './lib/DepositWarningModal.svelte'
 
 	// 기준 비용
 	let exceedLimit = 50000;
