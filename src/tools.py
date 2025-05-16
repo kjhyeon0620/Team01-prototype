@@ -28,4 +28,3 @@ def getAccountBalance() -> dict:
     return {
         'TEST-ADDRESS' : 300000
     }
-
