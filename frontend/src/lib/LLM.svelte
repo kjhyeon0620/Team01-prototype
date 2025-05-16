@@ -73,7 +73,7 @@
 
 	// llm stream function
 
-	let messages = $state<Message[]>([{ role: 'assistant', content: '안녕하세요!' }]);
+	let messages = $state<Message[]>([{ role: 'assistant', content: '안녕하세요!' },{ role: 'user', content: '안녕하세요!' }]);
 	let input    = $state('');
 	let chatContainer: HTMLDivElement;
 
@@ -114,8 +114,9 @@
 				// NOT APPROVAL_REQUIRED
 				if (/^\[TOOL_END\](.*)\[\/TOOL_END\]$/.test(content)) { 
 					const toolContent = JSON.parse(content.match(/^\[TOOL_END\](.*)\[\/TOOL_END\]$/)![1]);
-					console.log(toolContent)
     				messages.push({ role: 'assistant', content: toolContent.name, type: 'tool' });
+					await openToollModal(toolContent.name)
+
 				}
 				// APPROVAL_REQUIRED
 				else if (/^\[APPROVAL_REQUIRED\](.*)\[\/APPROVAL_REQUIRED\]$/.test(content)) {
@@ -140,6 +141,8 @@
 
 			}
 		}
+
+		
 		// generateAndPlayTTS({apiKey, voiceId, text:messages[messages.length-1].content})
 		setTimeout(() => chatContainer?.scrollTo({ top: chatContainer.scrollHeight }), 0);
 		return null
@@ -147,9 +150,10 @@
 	}
 
 
-	import { ApprovalModalStore, openApprovalModal, DepositWarningModalStore, openDepositWarningModal } from './store'
+	import { ApprovalModalStore, openApprovalModal, DepositWarningModalStore, openDepositWarningModal, ToolModalStore, openToollModal } from './store'
 	import ApprovalModal from './ApprovalModal.svelte'
 	import DepositWarningModal from './DepositWarningModal.svelte'
+    import ToolModal from './ToolModal.svelte';
 
 	// 기준 비용
 	let exceedLimit = 50000;
@@ -179,16 +183,21 @@
 
 
 
-<div class="h-screen flex flex-col max-w-md mx-auto">
+<div class="h-full w-full flex flex-col mx-auto border p-5 rounded-3xl">
   <div class="flex-1 overflow-auto p-2 space-y-2" bind:this={chatContainer}>
 	{#each messages as msg}
-	  <div class="max-w-[85%] px-3 py-2 text-sm break-words
-		{msg.role === 'user'
-		  ? 'ml-auto bg-gray-100'
-		  : 'mr-auto'}">
-		{#if msg.type == 'tool'}<span class="text-xs text-gray-500">[시스템]</span><br>{/if}
-		{msg.content}
-	  </div>
+
+		{#if msg.type == 'tool'}
+			<div class="w-full bg-amber-50 rounded-xl  px-3 py-2 text-sm break-words">실행 : {msg.content}</div>
+		{:else}
+			<div class="max-w-[85%] px-3 py-2 text-sm break-words rounded-xl
+			{msg.role === 'user'
+				? 'ml-auto bg-gray-100'
+				: 'mr-auto bg-amber-100'}">
+			{#if msg.role == 'assistant' && msg.type != 'tool'}<span class="text-xs text-gray-500">Bella</span><br>{/if}
+			{msg.content}
+			</div>
+		{/if}
 	{/each}
   </div>
 
@@ -215,4 +224,8 @@
 {/if}
 {#if $DepositWarningModalStore}
   <DepositWarningModal name={$DepositWarningModalStore.name} parameters={$DepositWarningModalStore.parameters} exceedLimit={exceedLimit} />
+{/if}
+
+{#if $ToolModalStore}
+  <ToolModal name={$ToolModalStore.name}  />
 {/if}
