@@ -12,5 +12,5 @@
 
 - address : str
 - money : int
-- agent_info : any
+- agent_info : str #대리인 카톡 아이디 
 
