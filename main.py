@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, UploadFile, File
 from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from src.graph import create_graph, Command, MemorySaver 
@@ -7,6 +7,10 @@ from pydantic import BaseModel
 from typing import Union
 import json
 import httpx
+
+from scipy.io import wavfile
+import io
+
 
 ## llm configuration 
 memory = MemorySaver()
@@ -68,7 +72,15 @@ async def stream(request: StreamRequest):
 
 
 
+@app.post('/set-voice-reference')
+async def set_voice_reference(file: UploadFile = File(...)): # file is .wav format
+    
+    audio_buffer = io.BytesIO(await file.read())
+    _, data = wavfile.read(audio_buffer) # data is np.darray
 
+# voice id verification 
+async def verify_voice_id(file: UploadFile):
+    pass
 
 
 # 블록체인 프록시
