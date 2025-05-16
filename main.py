@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from src.graph import create_graph, Command, MemorySaver 
@@ -6,7 +6,7 @@ from src.tools import transfer, getAccountBalance
 from pydantic import BaseModel
 from typing import Union
 import json
-
+import httpx
 
 ## llm configuration 
 memory = MemorySaver()
@@ -60,7 +60,6 @@ async def graph_generator(graph, query: Union[str, dict], thread_id: str):
             if "output" in event["data"]:
                 yield f"data: [DONE]\n\n"
 
-    print('--------')
 @app.post("/stream")
 async def stream(request: StreamRequest):
     generator = graph_generator(graph, request.query, request.thread_id)
@@ -68,3 +67,19 @@ async def stream(request: StreamRequest):
 
 
 
+
+
+
+
+# 블록체인 프록시
+EXPRESS_BASE_URL = 'http://localhost:3000'
+
+@app.api_route("/express/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
+async def proxy_to_express(request: Request, path: str):
+    async with httpx.AsyncClient() as client:
+        method = request.method
+        url = f"{EXPRESS_BASE_URL}/{path}"
+        headers = dict(request.headers)
+        body = await request.body()
+        response = await client.request(method, url, headers=headers, content=body)
+        return response.text, response.status_code, response.headers.items()
