@@ -21,3 +21,25 @@ export async function openApprovalModal(name: string, parameters: object) {
     });
   });
 }
+
+
+
+
+//  Voice Verification Modal
+type VoiceModalState = {
+  wav_file: Blob | null
+  resolver: (value: any) => void;
+} | null;
+
+export const VoiceModalStore = writable<VoiceModalState>(null);
+
+export async function openVoiceModal() {
+  return new Promise((resolve) => {
+    VoiceModalStore.set({
+      wav_file : null,
+      resolver: (result) => resolve(result)
+    });
+  });
+}
+
+
