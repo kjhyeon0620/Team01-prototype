@@ -18,6 +18,58 @@
 	};
 
 
+	const apiKey = "sk_6385f249516d6f10760e51fd6d526a9107a29ad175714db5";
+	const voiceId = "AW5wrnG1jVizOYY7R1Oo";
+
+
+	async function generateAndPlayTTS({apiKey,voiceId,text,gain = 5, // (1.0 = 원본)
+	}: any) {
+	try {
+		// 1. API 호출
+		const response = await fetch(
+		`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?output_format=mp3_44100_128`,
+		{
+			method: "POST",
+			headers: {
+			"Content-Type": "application/json",
+			"xi-api-key": apiKey,
+			Accept: "audio/mpeg",
+			},
+			body: JSON.stringify({
+			text,
+			model_id: 'eleven_multilingual_v2',
+			}),
+		}
+		);
+
+		if (!response.ok) {
+		const errorData = await response.json();
+		throw new Error(`TTS API Error: ${errorData.detail?.message || 'Unknown error'}`);
+		}
+
+		const audioContext = new AudioContext();
+		const arrayBuffer = await response.arrayBuffer();
+		const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+		
+		const gainNode = audioContext.createGain();
+		gainNode.gain.value = Math.min(Math.max(gain, 0.1), 5.0); // 0.1~5.0 범위 제한
+		
+		const source = audioContext.createBufferSource();
+		source.buffer = audioBuffer;
+		source.connect(gainNode).connect(audioContext.destination);
+		
+		if (audioContext.state === 'suspended') {
+		await audioContext.resume();
+		}
+		
+		source.start(0);
+
+	} catch (error) {
+		console.error("TTS 재생 실패:", error);
+		throw error; 
+	}
+	}
+
 
 	// llm stream function
 
@@ -56,6 +108,7 @@
 				if(!line.startsWith('data: ')) continue
 				const content = line.slice(6); // delete "data: "
 				if (content === '[DONE]') continue
+				
 
 
 				// NOT APPROVAL_REQUIRED
@@ -78,14 +131,15 @@
 				}
 				// 일반 텍스트 처리 
 				else {
-					if (!currentMessage) {
-					currentMessage = { role: 'assistant', content };
-					messages.push(currentMessage);
+					if (!currentMessage) {				
+						currentMessage = { role: 'assistant', content };
+						messages.push(currentMessage);
 					} else messages[messages.length-1].content = messages[messages.length-1].content + content;
 				}
 
 			}
 		}
+		generateAndPlayTTS({apiKey, voiceId, text:messages[messages.length-1].content})
 		setTimeout(() => chatContainer?.scrollTo({ top: chatContainer.scrollHeight }), 0);
 		return null
 
