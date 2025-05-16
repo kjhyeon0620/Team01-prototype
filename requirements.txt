@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+pydantic
+langchain
+langgraph
+python-dotenv
+typing-extensions
+openai
