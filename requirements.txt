@@ -9,3 +9,4 @@ openai
 tinydb
 scipy
 numpy
+resemblyzer

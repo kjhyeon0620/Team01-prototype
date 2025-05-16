@@ -23,6 +23,26 @@ export async function openApprovalModal(name: string, parameters: object) {
 }
 
 
+// 송금 위험 감지
+type DepositWarningModalState = {
+  name: string;
+  parameters: { [key: string]: any };
+  exceedLimit: number;
+  resolver: (value: any) => void;
+} | null;
+
+export const DepositWarningModalStore = writable<DepositWarningModalState>(null);
+
+export async function openDepositWarningModal(name: string, parameters: object, exceedLimit: number) {
+  return new Promise((resolve) => {
+    DepositWarningModalStore.set({
+      name,
+      parameters: { ...parameters },
+      exceedLimit,
+      resolver: (result) => resolve(result)
+    });
+  });
+}
 
 
 //  Voice Verification Modal
