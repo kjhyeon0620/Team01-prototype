@@ -113,8 +113,9 @@
 
 				// NOT APPROVAL_REQUIRED
 				if (/^\[TOOL_END\](.*)\[\/TOOL_END\]$/.test(content)) { 
-					const toolContent = content.match(/^\[TOOL_END\](.*)\[\/TOOL_END\]$/)![1];
-    				messages.push({ role: 'assistant', content: toolContent, type: 'tool' });
+					const toolContent = JSON.parse(content.match(/^\[TOOL_END\](.*)\[\/TOOL_END\]$/)![1]);
+					console.log(toolContent)
+    				messages.push({ role: 'assistant', content: toolContent.name, type: 'tool' });
 				}
 				// APPROVAL_REQUIRED
 				else if (/^\[APPROVAL_REQUIRED\](.*)\[\/APPROVAL_REQUIRED\]$/.test(content)) {
@@ -139,7 +140,7 @@
 
 			}
 		}
-		generateAndPlayTTS({apiKey, voiceId, text:messages[messages.length-1].content})
+		// generateAndPlayTTS({apiKey, voiceId, text:messages[messages.length-1].content})
 		setTimeout(() => chatContainer?.scrollTo({ top: chatContainer.scrollHeight }), 0);
 		return null
 

@@ -72,7 +72,7 @@ async def graph_generator(graph, query: Union[str, dict], thread_id: str):
         
         elif event["event"] == "on_tool_end":
             tool_output = event["data"]["output"]
-            yield f"data: [TOOL_END]{tool_output}[/TOOL_END]\n\n"
+            yield f"data: [TOOL_END]{json.dumps(tool_output.dict())}[/TOOL_END]\n\n"
         
         elif event["event"] == "on_chain_end" and "output" in event["data"]:
             if "output" in event["data"]:
