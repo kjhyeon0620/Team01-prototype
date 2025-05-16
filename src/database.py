@@ -1,7 +1,7 @@
 
 
 import os
-from tinydb import TinyDB
+from tinydb import TinyDB,Query
 
 
 # src/db.json 으로 데이터베이스 파일 위치 고정 

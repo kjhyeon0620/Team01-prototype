@@ -11,7 +11,8 @@ import httpx
 from scipy.io import wavfile
 import io
 
-from src.database import db
+from src.database import db, Query
+from src.utils import numpy_to_base64, base64_to_numpy
 
 ## llm configuration 
 memory = MemorySaver()
@@ -79,10 +80,34 @@ async def set_voice_reference(file: UploadFile = File(...)): # file is .wav form
     audio_buffer = io.BytesIO(await file.read())
     _, data = wavfile.read(audio_buffer) # data is np.darray
 
-# voice id verification 
-async def verify_voice_id(file: UploadFile):
-    pass
 
+    # insert database 
+    voice_reference = db.table('voice_reference')
+    voice_reference.insert({
+        'phone_number': '01012345678',
+        'reference': [numpy_to_base64(data)]
+    })
+
+
+
+# voice id verification 
+async def verify_voice_id(file: UploadFile) -> bool:
+
+    audio_buffer = io.BytesIO(await file.read())
+    _, data = wavfile.read(audio_buffer) # data is np.darray
+
+
+    query = Query()
+
+    voice_reference = db.table('voice_reference')
+    reference = voice_reference.search(query.phone_number == '01012345678')[0]
+
+    ref_array = base64_to_numpy(reference['reference'])
+
+    print(reference['phone_number'])
+
+    # reference + data verification logic ... [ ref_array, data ]
+    return False
 
 # 블록체인 프록시
 EXPRESS_BASE_URL = 'http://localhost:3000'
