@@ -44,7 +44,17 @@ class StreamRequest(BaseModel):
 async def graph_generator(graph, query: Union[str, dict], thread_id: str):
 
     
-    data = {'messages':[{'role': 'user', 'content': query}]} if isinstance(query, str) else Command(resume=query)
+    data = {'messages':[
+        {'role': 'system', 'content': """ 
+
+    -- 계좌번호 모음집 --
+    아들 : 110591730450
+    딸 :  330010323232
+    친구: 593923434398
+
+"""}, # 프로토타입, 기능 시연 용 시스템 프롬프트 
+        {'role': 'user', 'content': query},
+    ]} if isinstance(query, str) else Command(resume=query)
     async for event in graph.astream_events(data, config={"configurable": {"thread_id": thread_id}}, version="v2"):
         
       
