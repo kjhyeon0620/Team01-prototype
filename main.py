@@ -13,6 +13,7 @@ import io
 
 from src.database import db, Query
 from src.utils import numpy_to_base64, base64_to_numpy
+from src.voice import voice_verify
 
 ## llm configuration 
 memory = MemorySaver()
@@ -98,16 +99,15 @@ async def verify_voice_id(file: UploadFile) -> bool:
 
 
     query = Query()
-
     voice_reference = db.table('voice_reference')
-    reference = voice_reference.search(query.phone_number == '01012345678')[0]
+    result = voice_reference.search(query.phone_number == '01012345678')[0] # 0번째 결과
 
-    ref_array = base64_to_numpy(reference['reference'])
+    ref_array = base64_to_numpy(result['reference'][0]) # 0번째만 사용 
 
-    print(reference['phone_number'])
+    is_same, similarity = voice_verify([ref_array], data, verification_threshold=0.7) 
+    return is_same
 
-    # reference + data verification logic ... [ ref_array, data ]
-    return False
+
 
 # 블록체인 프록시
 EXPRESS_BASE_URL = 'http://localhost:3000'
