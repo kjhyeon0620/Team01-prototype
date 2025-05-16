@@ -11,6 +11,7 @@ import httpx
 from scipy.io import wavfile
 import io
 
+from src.database import db
 
 ## llm configuration 
 memory = MemorySaver()
