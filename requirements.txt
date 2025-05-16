@@ -8,3 +8,4 @@ typing-extensions
 openai
 tinydb
 scipy
+numpy

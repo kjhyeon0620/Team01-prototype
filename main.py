@@ -10,6 +10,7 @@ import httpx
 
 from scipy.io import wavfile
 import io
+import numpy as np
 
 from src.database import db, Query
 from src.utils import numpy_to_base64, base64_to_numpy
@@ -78,9 +79,9 @@ async def stream(request: StreamRequest):
 @app.post('/set-voice-reference')
 async def set_voice_reference(file: UploadFile = File(...)): # file is .wav format
     
+    
     audio_buffer = io.BytesIO(await file.read())
     _, data = wavfile.read(audio_buffer) # data is np.darray
-
 
     # insert database 
     voice_reference = db.table('voice_reference')
@@ -89,10 +90,10 @@ async def set_voice_reference(file: UploadFile = File(...)): # file is .wav form
         'reference': [numpy_to_base64(data)]
     })
 
-
+    
 
 # voice id verification 
-async def verify_voice_id(file: UploadFile) -> bool:
+async def verify_voice_id(file: UploadFile, verification_threshold=0.7) -> bool:
 
     audio_buffer = io.BytesIO(await file.read())
     _, data = wavfile.read(audio_buffer) # data is np.darray
@@ -102,9 +103,9 @@ async def verify_voice_id(file: UploadFile) -> bool:
     voice_reference = db.table('voice_reference')
     result = voice_reference.search(query.phone_number == '01012345678')[0] # 0번째 결과
 
-    ref_array = base64_to_numpy(result['reference'][0]) # 0번째만 사용 
+    ref_array = base64_to_numpy(result['reference'][0], np.int16) # 0번째만 사용 
 
-    is_same, similarity = voice_verify([ref_array], data, verification_threshold=0.7) 
+    is_same, similarity = voice_verify([ref_array], data, verification_threshold=verification_threshold) 
     return is_same
 
 
