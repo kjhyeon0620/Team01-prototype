@@ -13,6 +13,12 @@ def transfer(address: str, amount: int) -> str:
 
     human_response = interrupt({'address': address, 'amount': amount})
 
+    if human_response['amount'] >= 50000:
+        return f"50,000 보다 큰 {human_response['amount']}원을 송금을 시도해 실패했습니다."
+    
+    if ( not human_response['address'] or not human_response['amount']):
+        return '송금을 취소했습니다' 
+
     return f"최종 확인된 정보에 따라 {human_response['address']} 계좌로 {human_response['amount']}원을 송금했습니다."
 
 

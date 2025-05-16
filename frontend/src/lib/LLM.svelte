@@ -94,7 +94,7 @@
 
 	import { ApprovalModalStore, openApprovalModal, DepositWarningModalStore, openDepositWarningModal } from './store'
 	import ApprovalModal from './ApprovalModal.svelte'
-	import DepositWarningModal from './lib/DepositWarningModal.svelte'
+	import DepositWarningModal from './DepositWarningModal.svelte'
 
 	// 기준 비용
 	let exceedLimit = 50000;
@@ -105,25 +105,12 @@
 		const APPROVAL_REQUIRED = await createStream(text, thread_id)
 		if (APPROVAL_REQUIRED) {
 			if (APPROVAL_REQUIRED.parameters.amount >= exceedLimit) {
-				const result = await openDepositWarningModal(APPROVAL_REQUIRED.name, APPROVAL_REQUIRED.parameters, exceedLimit);
-				await createStream(
-					{ cancel: true, tool_call_id: APPROVAL_REQUIRED.tool_call_id },
-					thread_id,
-					false
-				);
+				await openDepositWarningModal(APPROVAL_REQUIRED.name, APPROVAL_REQUIRED.parameters, exceedLimit);
 			}
-			else {
-				const result = await openApprovalModal(APPROVAL_REQUIRED.name, APPROVAL_REQUIRED.parameters);
-				if (result) {
-					const k = await createStream(result, thread_id, false)
-				} else {
-					await createStream(
-						{ cancel: true, tool_call_id: APPROVAL_REQUIRED.tool_call_id },
-						thread_id,
-						false
-					);
-				}
-			}
+			
+			const result = await openApprovalModal(APPROVAL_REQUIRED.name, APPROVAL_REQUIRED.parameters);
+
+			await createStream(result || {'address' : '', amount : 0}, thread_id, false)
 		}
 
 	}
